@@ -1,0 +1,39 @@
+services:
+  redis:
+    image: redis:7-alpine
+    container_name: exchange-rate-redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis-data:/data
+    networks:
+      - exchange-rate-net
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: exchange-rate-app
+    ports:
+      - '3000:3000'
+    env_file:
+      - .env
+    depends_on:
+      - redis
+    networks:
+      - exchange-rate-net
+    volumes:
+      - ./src:/app/src
+      - ./package.json:/app/package.json
+      - ./pnpm-lock.yaml:/app/pnpm-lock.yaml
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./nest-cli.json:/app/nest-cli.json
+      - ./eslint.config.mjs:/app/eslint.config.mjs
+      - ./.prettierrc:/app/.prettierrc
+    # Enable interactive mode for better logging
+    stdin_open: true
+    tty: true
+volumes:
+  redis-data:
+networks:
+  exchange-rate-net:
+    driver: bridge 

@@ -9,6 +9,6 @@ export class CurrencyRatesController {
     @Get()
     getRates() {
         // Future logic to return currency rates
-        return { message: 'Currency rates endpoint' };
+        return { message: 'Currency rates endpoint with HOT RELOAD!!! 🚀' };
     }
 } 
