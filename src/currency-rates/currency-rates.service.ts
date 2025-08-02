@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  HttpException,
+  Inject,
+  Injectable,
+} from '@nestjs/common';
 import { RedisClientType } from 'redis';
 import { REDIS_CLIENT } from 'src/redis/redis.module';
 
@@ -23,6 +28,11 @@ export class CurrencyRatesService {
       },
     );
     const response = await fetch(request);
+
+    if (!response.ok) {
+      throw new HttpException(`Failed to get currencies`, response.status);
+    }
+
     const data = (await response.json()) as {
       currencies: Record<string, string>;
     };
@@ -41,7 +51,9 @@ export class CurrencyRatesService {
       );
     }
 
-    const cachedRate = await this.redisClient.hGet(`rate:${from}`, to);
+    const hashKey = `rate:${from}`;
+
+    const cachedRate = await this.redisClient.hGet(hashKey, to);
     if (cachedRate) {
       return { rate: JSON.parse(cachedRate) as number };
     }
@@ -55,14 +67,20 @@ export class CurrencyRatesService {
       },
     );
     const response = await fetch(request);
+
+    if (!response.ok) {
+      throw new HttpException(
+        `Failed to get rate for ${from}/${to}`,
+        response.status,
+      );
+    }
+
     const data = (await response.json()) as {
       base: string;
       results: Record<string, number>;
       updated: string;
       ms: number;
     };
-
-    const hashKey = `rate:${data.base}`;
 
     await this.redisClient.hSet(hashKey, {
       ...data.results,
