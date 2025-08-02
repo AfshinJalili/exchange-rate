@@ -7,8 +7,8 @@ export class CurrencyRatesController {
     constructor(private readonly currencyRatesService: CurrencyRatesService) { }
 
     @Get('rate')
-    getRates(@Query('from') from: string, @Query('to') to: string) {
-        return { from, to, rate: 1.2 };
+    getRate(@Query('from') from: string, @Query('to') to: string) {
+        return this.currencyRatesService.getRate(from, to);
     }
 
     @Get('currencies')
