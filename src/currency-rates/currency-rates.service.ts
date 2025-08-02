@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { RedisClientType } from 'redis';
 import { REDIS_CLIENT } from 'src/redis/redis.module';
 
@@ -9,10 +9,9 @@ export class CurrencyRatesService {
   ) {}
 
   async getCurrencies() {
-    const cachedCurrencies = await this.redisClient.get('currencies');
-    if (cachedCurrencies) {
-      const currencies = JSON.parse(cachedCurrencies) as Record<string, string>;
-      return { currencies };
+    const cachedCurrencies = await this.redisClient.hGetAll('currencies');
+    if (Object.keys(cachedCurrencies).length > 0) {
+      return { currencies: cachedCurrencies as Record<string, string> };
     }
 
     const request = new Request(
@@ -28,12 +27,20 @@ export class CurrencyRatesService {
       currencies: Record<string, string>;
     };
 
-    await this.redisClient.set('currencies', JSON.stringify(data.currencies));
+    await this.redisClient.hSet('currencies', data.currencies);
 
     return { currencies: data.currencies };
   }
 
   async getRate(from: string, to: string) {
+    const currencies = await this.getCurrencies();
+    if (!currencies.currencies[from] || !currencies.currencies[to]) {
+      throw new BadRequestException(
+        `Invalid currency code: ${from} or ${to}`,
+        'Invalid currency code',
+      );
+    }
+
     const cachedRate = await this.redisClient.hGet(`rate:${from}`, to);
     if (cachedRate) {
       return { rate: JSON.parse(cachedRate) as number };
