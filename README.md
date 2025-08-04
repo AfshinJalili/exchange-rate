@@ -1,98 +1,281 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Currency Exchange Rate API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+A robust, production-ready REST API for fetching real-time currency exchange rates, built with NestJS, TypeScript, and Redis caching.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Features
 
-## Description
+- **Real-time Exchange Rates**: Fetch current exchange rates from FastForex API
+- **Currency List**: Get all supported currencies with their names
+- **Redis Caching**: Intelligent caching to reduce API calls and improve performance
+- **Docker Support**: Complete containerization for easy deployment
+- **TypeScript**: Full type safety and modern JavaScript features
+- **Error Handling**: Comprehensive error handling with proper HTTP status codes
+- **Validation**: Input validation and sanitization
+- **Testing**: Unit and E2E tests included
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 🏗️ Architecture
 
-## Project setup
-
-```bash
-$ pnpm install
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Client App    │───▶│  NestJS API     │───▶│  FastForex API  │
+│                 │    │                 │    │                 │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                              │
+                              ▼
+                       ┌─────────────────┐
+                       │   Redis Cache   │
+                       │                 │
+                       └─────────────────┘
 ```
 
-## Compile and run the project
+## 📋 Prerequisites
 
-```bash
-# development
-$ pnpm run start
+- Node.js (v18 or higher)
+- pnpm (recommended) or npm
+- Docker and Docker Compose (for containerized deployment)
+- Redis (included in Docker setup)
 
-# watch mode
-$ pnpm run start:dev
+## 🛠️ Installation
 
-# production mode
-$ pnpm run start:prod
+### Option 1: Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd exchange-rate
+   ```
+
+2. **Install dependencies**
+   ```bash
+   pnpm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+   
+   Edit `.env` with your configuration:
+   ```env
+   FAST_FOREX_API_URL=https://api.fastforex.io
+   FAST_FOREX_API_KEY=your_api_key_here
+   REDIS_URL=redis://localhost:6379
+   PORT=3000
+   NODE_ENV=development
+   ```
+
+4. **Start Redis** (if not using Docker)
+   ```bash
+   # macOS with Homebrew
+   brew install redis
+   brew services start redis
+   
+   # Or use Docker
+   docker run -d -p 6379:6379 redis:7-alpine
+   ```
+
+5. **Run the application**
+   ```bash
+   # Development mode
+   pnpm run start:dev
+   
+   # Production mode
+   pnpm run build
+   pnpm run start:prod
+   ```
+
+### Option 2: Docker Deployment
+
+1. **Clone and set up environment**
+   ```bash
+   git clone <your-repo-url>
+   cd exchange-rate
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+2. **Run with Docker Compose**
+   ```bash
+   # Development
+   pnpm run docker:dev
+   
+   # Production
+   pnpm run docker:prod
+   ```
+
+3. **View logs**
+   ```bash
+   pnpm run docker:dev:logs
+   ```
+
+## 📚 API Documentation
+
+### Base URL
+```
+http://localhost:3000
 ```
 
-## Run tests
+### Endpoints
 
-```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+#### Get All Supported Currencies
+```http
+GET /currency-rates/currencies
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+**Response:**
+```json
+{
+  "currencies": {
+    "USD": "US Dollar",
+    "EUR": "Euro",
+    "GBP": "British Pound",
+    "JPY": "Japanese Yen",
+    "AUD": "Australian Dollar"
+  }
+}
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+#### Get Exchange Rate
+```http
+GET /currency-rates/rate?from=USD&to=EUR
+```
 
-## Resources
+**Parameters:**
+- `from` (required): Source currency code (e.g., USD, EUR, GBP)
+- `to` (required): Target currency code (e.g., USD, EUR, GBP)
 
-Check out a few resources that may come in handy when working with NestJS:
+**Response:**
+```json
+{
+  "rate": 0.85
+}
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+**Error Response:**
+```json
+{
+  "statusCode": 400,
+  "message": "Invalid currency code: USD or INVALID",
+  "error": "Invalid currency code"
+}
+```
 
-## Support
+## 🧪 Testing
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```bash
+# Unit tests
+pnpm run test
 
-## Stay in touch
+# E2E tests
+pnpm run test:e2e
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Test coverage
+pnpm run test:cov
 
-## License
+# Watch mode
+pnpm run test:watch
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+## 🐳 Docker Commands
+
+```bash
+# Development
+pnpm run docker:dev          # Start development containers
+pnpm run docker:dev:logs     # View development logs
+pnpm run docker:dev:down     # Stop development containers
+
+# Production
+pnpm run docker:prod         # Start production containers
+pnpm run docker:prod:down    # Stop production containers
+```
+
+## 🔧 Development
+
+### Available Scripts
+
+```bash
+pnpm run build              # Build the application
+pnpm run start              # Start the application
+pnpm run start:dev          # Start in development mode with hot reload
+pnpm run start:debug        # Start in debug mode
+pnpm run start:prod         # Start in production mode
+pnpm run lint               # Run ESLint
+pnpm run format             # Format code with Prettier
+pnpm run test               # Run unit tests
+pnpm run test:e2e           # Run E2E tests
+pnpm run test:cov           # Run tests with coverage
+```
+
+### Project Structure
+
+```
+src/
+├── currency-rates/          # Currency rates module
+│   ├── currency-rates.controller.ts
+│   ├── currency-rates.service.ts
+│   └── currency-rates.module.ts
+├── redis/                   # Redis configuration
+│   └── redis.module.ts
+├── app.module.ts           # Root application module
+└── main.ts                 # Application entry point
+```
+
+## 🔒 Environment Variables
+
+| Variable | Description | Required | Default |
+|----------|-------------|----------|---------|
+| `FAST_FOREX_API_URL` | FastForex API base URL | Yes | - |
+| `FAST_FOREX_API_KEY` | FastForex API key | Yes | - |
+| `REDIS_URL` | Redis connection URL | No | `redis://localhost:6379` |
+| `PORT` | Application port | No | `3000` |
+| `NODE_ENV` | Environment mode | No | `development` |
+
+## 🚀 Deployment
+
+### Production Considerations
+
+1. **Environment Variables**: Ensure all required environment variables are set
+2. **Redis Persistence**: Configure Redis persistence for production
+3. **Logging**: Set up proper logging and monitoring
+4. **Security**: Configure CORS, rate limiting, and security headers
+5. **SSL/TLS**: Use HTTPS in production
+
+### Example Production Deployment
+
+```bash
+# Build production image
+docker build -t currency-api:latest .
+
+# Run with production environment
+docker run -d \
+  --name currency-api \
+  -p 3000:3000 \
+  --env-file .env.production \
+  currency-api:latest
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📝 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 🙏 Acknowledgments
+
+- [NestJS](https://nestjs.com/) - Progressive Node.js framework
+- [FastForex](https://fastforex.io/) - Currency exchange rate data
+- [Redis](https://redis.io/) - In-memory data structure store
+
+## 📞 Support
+
+If you have any questions or need help, please open an issue on GitHub.
+
+---
+
+**Built with ❤️ using NestJS and TypeScript**
