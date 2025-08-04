@@ -5,7 +5,7 @@ import {
   Injectable,
 } from '@nestjs/common';
 import { RedisClientType } from 'redis';
-import { REDIS_CLIENT } from 'src/redis/redis.module';
+import { REDIS_CLIENT } from '../redis/redis.module';
 
 @Injectable()
 export class CurrencyRatesService {
